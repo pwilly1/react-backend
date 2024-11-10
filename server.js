@@ -8,7 +8,7 @@ app.use(express.static("public"));
 const listings = [
     {
         "_id": 1,
-        "img_name": "images/house0.jpg",
+        "img_name": "house0.jpg",
         "price": "$400,000",
         "description": "3 bds | 2 ba | 2,200 sqft",
         "address": "1234 Oak St, Columbia, SC, 29203",
