@@ -1,5 +1,6 @@
 const express = require("express");
 const cors = require("cors");
+const Joi = require("joi");
 const app = express();
 app.use(cors());
 app.use(express.static("public"));
@@ -128,12 +129,32 @@ const listings = [
       }
 ];
 
+const listingSchema = Joi.object({
+  img_name: Joi.string().required(),
+  price: Joi.string().required(),
+  description: Joi.string().required(),
+  address: Joi.string().required(),
+  features: Joi.array().items(Joi.string()).required(),
+  year_built: Joi.number().integer().min(1800).required(),
+  property_type: Joi.string().required(),
+  listing_status: Joi.string().required(),
+});
+
 app.get("/", (req, res) => {
   res.sendFile(__dirname + "/index.html");
 });
 
 app.get("/api/listings", (req, res) => {
   res.json(listings);
+});
+
+app.post("/api/listings", (req, res) => {
+  const { error } = listingSchema.validate(req.body);
+  if (error) return res.status(400).send({ success: false, message: error.message });
+
+  const newListing = { ...req.body, _id: listings.length + 1 };
+  listings.push(newListing);
+  res.status(201).send({ success: true, listing: newListing });
 });
 
 app.listen(3001, () => {
