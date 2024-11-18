@@ -2,143 +2,148 @@ const express = require("express");
 const cors = require("cors");
 const Joi = require("joi");
 const app = express();
+const multer = require('multer');
+const path = require('path');
 app.use(cors());
+app.use(express.json());
 app.use(express.static("public"));
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'public/images/'); // Save files to 'public/uploads' directory
+  },
+  filename: (req, file, cb) => {
+    cb(null, `${Date.now()}-${file.originalname}`); // Unique file name
+  },
+});
+
+const upload = multer({ storage });
 
 
 const listings = [
-    {
-        "_id": 1,
-        "img_name": "images/house0.jpg",
-        "price": "$400,000",
-        "description": "3 bds | 2 ba | 2,200 sqft",
-        "address": "1234 Oak St, Columbia, SC, 29203",
-        "features": [
-          "Garage",
-          "Backyard",
-          "Fireplace"
-        ],
-        "year_built": 2005,
-        "property_type": "Single-family",
-        "listing_status": "For Sale"
-      },
-      {
-        "_id": 2,
-        "img_name": "images/house.jpeg",
-        "price": "$535,000",
-        "description": "4 bds | 3 ba | 3,100 sqft",
-        "address": "5678 Pine Ave, Columbia, SC, 29203",
-        "features": [
-          "Swimming Pool",
-          "Patio",
-          "Modern Kitchen"
-        ],
-        "year_built": 2010,
-        "property_type": "Single-family",
-        "listing_status": "For Sale"
-      },
-      {
-        "_id": 3,
-        "img_name": "images/house2.jpg",
-        "price": "$315,000",
-        "description": "2 bds | 1.5 ba | 1,600 sqft",
-        "address": "910 Birch Rd, Columbia, SC, 29203",
-        "features": [
-          "Open Floor Plan",
-          "Granite Countertops",
-          "Hardwood Floors"
-        ],
-        "year_built": 2000,
-        "property_type": "Townhouse",
-        "listing_status": "For Sale"
-      },
-      {
-        "_id": 4,
-        "img_name": "images/house3.jpg",
-        "price": "$390,000",
-        "description": "3 bds | 2 ba | 2,050 sqft",
-        "address": "4321 Elm St, Columbia, SC, 29203",
-        "features": [
-          "Finished Basement",
-          "Walk-in Closet",
-          "Energy-efficient Windows"
-        ],
-        "year_built": 2008,
-        "property_type": "Single-family",
-        "listing_status": "For Sale"
-      },
-      {
-        "_id": 5,
-        "img_name": "images/house4.jpg",
-        "price": "$315,000",
-        "description": "2 bds | 1 ba | 1,400 sqft",
-        "address": "7890 Maple Dr, Columbia, SC, 29203",
-        "features": [
-          "Fenced Yard",
-          "Stainless Steel Appliances",
-          "Renovated Bathroom"
-        ],
-        "year_built": 1995,
-        "property_type": "Single-family",
-        "listing_status": "For Sale"
-      },
-      {
-        "_id": 6,
-        "img_name": "images/house5.jpg",
-        "price": "$405,000",
-        "description": "3 bds | 2 ba | 1,850 sqft",
-        "address": "6789 Cedar Blvd, Columbia, SC, 29203",
-        "features": [
-          "Sunroom",
-          "Large Backyard",
-          "2-Car Garage"
-        ],
-        "year_built": 2003,
-        "property_type": "Single-family",
-        "listing_status": "For Sale"
-      },
-      {
-        "_id": 7,
-        "img_name": "images/house0.jpg",
-        "price": "$500,000",
-        "description": "4 bds | 3 ba | 2,500 sqft",
-        "address": "3456 Palm St, Columbia, SC, 29203",
-        "features": [
-          "Private Deck",
-          "Fire Pit",
-          "In-law Suite"
-        ],
-        "year_built": 2015,
-        "property_type": "Single-family",
-        "listing_status": "For Sale"
-      },
-      {
-        "_id": 8,
-        "img_name": "images/house2.jpg",
-        "price": "$330,000",
-        "description": "2 bds | 2 ba | 1,750 sqft",
-        "address": "9876 Spruce Ln, Columbia, SC, 29203",
-        "features": [
-          "New Roof",
-          "Updated Kitchen",
-          "Built-in Bookshelves"
-        ],
-        "year_built": 2012,
-        "property_type": "Townhouse",
-        "listing_status": "For Sale"
-      }
+  {
+    _id: 1,
+    img_name: "images/house1.jpg",
+    price: "$400,000",
+    beds: 3,
+    baths: 2,
+    sqft: 2000,
+    address: "123 Maple St, Springfield, IL, 62704",
+    features: ["Fireplace", "Large Backyard", "Granite Countertops"],
+    year_built: 2010,
+    property_type: "Single-Family Home",
+    listing_status: "For Sale",
+  },
+  {
+    _id: 2,
+    img_name: "images/house2.jpg",
+    price: "$330,000",
+    beds: 2,
+    baths: 2,
+    sqft: 1750,
+    address: "9876 Spruce Ln, Columbia, SC, 29203",
+    features: ["New Roof", "Updated Kitchen", "Built-in Bookshelves"],
+    year_built: 2012,
+    property_type: "Townhouse",
+    listing_status: "For Sale",
+  },
+  {
+    _id: 3,
+    img_name: "images/house3.jpg",
+    price: "$500,000",
+    beds: 4,
+    baths: 3,
+    sqft: 2500,
+    address: "456 Oak St, Denver, CO, 80204",
+    features: ["Swimming Pool", "Solar Panels", "Hardwood Floors"],
+    year_built: 2015,
+    property_type: "Single-Family Home",
+    listing_status: "Pending",
+  },
+  {
+    _id: 4,
+    img_name: "images/house4.jpg",
+    price: "$275,000",
+    beds: 2,
+    baths: 1,
+    sqft: 1200,
+    address: "789 Pine St, Portland, OR, 97202",
+    features: ["Patio", "New HVAC System", "Corner Lot"],
+    year_built: 2005,
+    property_type: "Condo",
+    listing_status: "For Sale",
+  },
+  {
+    _id: 5,
+    img_name: "images/house5.jpg",
+    price: "$650,000",
+    beds: 5,
+    baths: 4,
+    sqft: 3200,
+    address: "321 Birch Ave, Austin, TX, 73301",
+    features: ["3-Car Garage", "Game Room", "Custom Lighting"],
+    year_built: 2018,
+    property_type: "Single-Family Home",
+    listing_status: "Sold",
+  },
+  {
+    _id: 6,
+    img_name: "images/house6.jpg",
+    price: "$350,000",
+    beds: 3,
+    baths: 2,
+    sqft: 1800,
+    address: "789 Willow Dr, Seattle, WA, 98101",
+    features: ["Deck", "Finished Basement", "Updated Bathrooms"],
+    year_built: 2010,
+    property_type: "Townhouse",
+    listing_status: "For Sale",
+  },
+  {
+    _id: 7,
+    img_name: "images/house7.jpg",
+    price: "$425,000",
+    beds: 4,
+    baths: 3,
+    sqft: 2100,
+    address: "345 Cedar Ln, Miami, FL, 33101",
+    features: ["Waterfront", "Open Floor Plan", "High Ceilings"],
+    year_built: 2020,
+    property_type: "Single-Family Home",
+    listing_status: "Pending",
+  },
+  {
+    _id: 8,
+    img_name: "images/house8.jpg",
+    price: "$275,000",
+    beds: 2,
+    baths: 1,
+    sqft: 1300,
+    address: "678 Poplar Rd, Atlanta, GA, 30301",
+    features: ["Hardwood Floors", "Updated Kitchen", "Fenced Yard"],
+    year_built: 2005,
+    property_type: "Condo",
+    listing_status: "For Sale",
+  },
 ];
 
 const listingSchema = Joi.object({
-  img_name: Joi.string().required(),
   price: Joi.string().required(),
-  description: Joi.string().required(),
+  beds: Joi.number().integer().required(),
+  baths: Joi.number().integer().required(),
+  sqft: Joi.number().integer().required(),
   address: Joi.string().required(),
   features: Joi.array().items(Joi.string()).required(),
-  year_built: Joi.number().integer().min(1800).required(),
-  property_type: Joi.string().required(),
-  listing_status: Joi.string().required(),
+  year_built: Joi.number().integer().min(1800).max(new Date().getFullYear()).required(),
+  property_type: Joi.string()
+    .valid('Single-Family Home', 'Townhouse', 'Condo', 'Apartment', 'Other')
+    .required(),
+  listing_status: Joi.string()
+    .valid('For Sale', 'Sold', 'Pending', 'Off Market')
+    .required(),
 });
+
+
 
 app.get("/", (req, res) => {
   res.sendFile(__dirname + "/index.html");
@@ -148,14 +153,42 @@ app.get("/api/listings", (req, res) => {
   res.json(listings);
 });
 
-app.post("/api/listings", (req, res) => {
-  const { error } = listingSchema.validate(req.body);
-  if (error) return res.status(400).send({ success: false, message: error.message });
+app.post("/api/listings", upload.single('image'), (req, res) => {
+  console.log("Incoming request body:", req.body);
+  console.log("Uploaded file:", req.file);
 
-  const newListing = { ...req.body, _id: listings.length + 1 };
+  // Validate incoming data
+  const { error } = listingSchema.validate(req.body);
+  if (error) {
+    console.error("Validation error:", error.message);
+    return res.status(400).send({ success: false, message: error.message });
+  }
+
+  // Create a new listing with default values for any missing fields
+  const newListing = {
+    _id: listings.length + 1,
+    img_name: req.file ? `/uploads/${req.file.filename}` : 'images/default.jpg',
+    price: req.body.price,
+    beds: parseInt(req.body.bds, 10),
+    baths: parseInt(req.body.baths, 10),
+    sqft: parseInt(req.body.sqft, 10),
+    address: req.body.address,
+    features: req.body.features || [],
+    year_built: parseInt(req.body.year_built, 10) || 2000,
+    property_type: req.body.property_type,
+    listing_status: req.body.listing_status || 'For Sale',
+  };
+
+  // Add the new listing to the in-memory listings array
   listings.push(newListing);
+
+  // Log the added listing for debugging
+  console.log("New listing added:", newListing);
+
+  // Send a success response with the new listing
   res.status(201).send({ success: true, listing: newListing });
 });
+
 
 app.listen(3001, () => {
   console.log("Listening....");
