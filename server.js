@@ -169,7 +169,7 @@ app.post("/api/listings", upload.single('image'), (req, res) => {
     _id: listings.length + 1,
     img_name: req.file ? `/uploads/${req.file.filename}` : 'images/default.jpg',
     price: req.body.price,
-    beds: parseInt(req.body.bds, 10),
+    beds: parseInt(req.body.beds, 10),
     baths: parseInt(req.body.baths, 10),
     sqft: parseInt(req.body.sqft, 10),
     address: req.body.address,
