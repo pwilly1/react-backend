@@ -23,7 +23,7 @@ const upload = multer({ storage });
 const listings = [
   {
     _id: 1,
-    img_name: "images/house1.jpg",
+    img_name: "images/house.jpeg",
     price: "$400,000",
     beds: 3,
     baths: 2,
@@ -88,7 +88,7 @@ const listings = [
   },
   {
     _id: 6,
-    img_name: "images/house6.jpg",
+    img_name: "images/house0.jpg",
     price: "$350,000",
     beds: 3,
     baths: 2,
@@ -101,7 +101,7 @@ const listings = [
   },
   {
     _id: 7,
-    img_name: "images/house7.jpg",
+    img_name: "images/house3.jpg",
     price: "$425,000",
     beds: 4,
     baths: 3,
@@ -114,7 +114,7 @@ const listings = [
   },
   {
     _id: 8,
-    img_name: "images/house8.jpg",
+    img_name: "images/house5.jpg",
     price: "$275,000",
     beds: 2,
     baths: 1,
