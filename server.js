@@ -5,6 +5,7 @@ const app = express();
 const multer = require('multer');
 const path = require('path');
 app.use(cors());
+app.use(express.json());
 app.use(express.json());  
 app.use(express.static("public"));
 
@@ -189,49 +190,28 @@ app.post("/api/listings", upload.single('image'), (req, res) => {
   res.status(201).send({ success: true, listing: newListing });
 });
 
-const updateSchema = Joi.object({
-  price: Joi.string().required(),
-  address: Joi.string().required(),
-}).required();
-
 app.put("/api/listings/:id", (req, res) => {
   const listingId = parseInt(req.params.id, 10);
-
-  const { error } = updateSchema.validate(req.body);
+  const { error } = listingSchema.validate(req.body);
   if (error) {
-    console.error("Validation error:", error.message);
     return res.status(400).send({ success: false, message: error.message });
   }
-
   const listingIndex = listings.findIndex((listing) => listing._id === listingId);
   if (listingIndex === -1) {
-    console.error("Listing not found for ID:", listingId);
     return res.status(404).send({ success: false, message: "Listing not found" });
   }
-
-  // Only update price and address
-  listings[listingIndex].price = req.body.price;
-  listings[listingIndex].address = req.body.address;
-
+  listings[listingIndex] = { ...listings[listingIndex], ...req.body };
   res.status(200).send({ success: true, listing: listings[listingIndex] });
 });
-
-
-
 app.delete("/api/listings/:id", (req, res) => {
   const listingId = parseInt(req.params.id, 10);
   const listingIndex = listings.findIndex((listing) => listing._id === listingId);
-
   if (listingIndex === -1) {
     return res.status(404).send({ success: false, message: "Listing not found" });
   }
-
   listings.splice(listingIndex, 1);
   res.status(200).send({ success: true, message: "Listing deleted successfully" });
 });
-
-
-
 
 app.listen(3001, () => {
   console.log("Listening....");
