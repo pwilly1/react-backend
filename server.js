@@ -195,7 +195,7 @@ const updateSchema = Joi.object({
 }).required();
 
 app.put("/api/listings/:id", (req, res) => {
-  const listingId = parseInt(req.params.id, 10);
+  const listingId = parseInt(req.params._id, 10);
 
   const { error } = updateSchema.validate(req.body);
   if (error) {
