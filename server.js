@@ -195,7 +195,7 @@ const updateSchema = Joi.object({
 }).required();
 
 app.put("/api/listings/:id", (req, res) => {
-  const listingId = parseInt(req.params._id, 10);
+  const listingId = parseInt(req.params.id, 10);
 
   const { error } = updateSchema.validate(req.body);
   if (error) {
@@ -229,7 +229,6 @@ app.delete("/api/listings/:id", (req, res) => {
   listings.splice(listingIndex, 1);
   res.status(200).send({ success: true, message: "Listing deleted successfully" });
 });
-console.log("Attempting to delete listing with ID:", listingId);
 
 
 
