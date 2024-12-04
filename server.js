@@ -215,7 +215,15 @@ app.put("/api/listings/:id", (req, res) => {
 
   res.status(200).send({ success: true, listing: listings[listingIndex] });
 });
-
+app.delete("/api/listings/:id", (req, res) => {
+  const listingId = parseInt(req.params.id, 10);
+  const listingIndex = listings.findIndex((listing) => listing._id === listingId);
+  if (listingIndex === -1) {
+    return res.status(404).send({ success: false, message: "Listing not found" });
+  }
+  listings.splice(listingIndex, 1);
+  res.status(200).send({ success: true, message: "Listing deleted successfully" });
+});
 
 app.listen(3001, () => {
   console.log("Listening....");
