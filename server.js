@@ -117,7 +117,7 @@ app.post("/api/listings", upload.single("image"), async (req, res) => {
 // Update a listing
 app.put("/api/listings/:id", async (req, res) => {
   try {
-    const updatedListing = await Listing.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const updatedListing = await Listing.findByIdAndUpdate(req.params._id, req.body, { new: true });
     if (!updatedListing) {
       return res.status(404).send({ success: false, message: "Listing not found" });
     }
@@ -130,7 +130,7 @@ app.put("/api/listings/:id", async (req, res) => {
 // Delete a listing
 app.delete("/api/listings/:id", async (req, res) => {
   try {
-    const deletedListing = await Listing.findByIdAndDelete(req.params.id);
+    const deletedListing = await Listing.findByIdAndDelete(req.params._id);
     if (!deletedListing) {
       return res.status(404).send({ success: false, message: "Listing not found" });
     }
