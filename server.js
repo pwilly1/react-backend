@@ -1,134 +1,61 @@
 const express = require("express");
 const cors = require("cors");
 const Joi = require("joi");
+const multer = require("multer");
+const path = require("path");
+const mongoose = require("mongoose");
+
 const app = express();
-const multer = require('multer');
-const path = require('path');
+
+// Middleware
 app.use(cors());
 app.use(express.json());
-app.use(express.json());  
 app.use(express.static("public"));
 
+// Connect to MongoDB
+mongoose
+  .connect("mongodb+srv://pres:MM5QMJP6kKH4oPyS@cluster0.hjwww.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0", {
+  })
+  .then(() => console.log("Connected to MongoDB"))
+  .catch((err) => console.error("Failed to connect to MongoDB:", err));
+
+// Multer setup for image uploads
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, 'public/images/'); // Save files to 'public/uploads' directory
+    cb(null, "public/images/");
   },
   filename: (req, file, cb) => {
-    cb(null, `${Date.now()}-${file.originalname}`); // Unique file name
+    cb(null, `${Date.now()}-${file.originalname}`);
+  },
+});
+const upload = multer({ storage });
+
+// Mongoose schema and model
+const listingSchema = new mongoose.Schema({
+  img_name: { type: String, required: true },
+  price: { type: String, required: true },
+  beds: { type: Number, required: true },
+  baths: { type: Number, required: true },
+  sqft: { type: Number, required: true },
+  address: { type: String, required: true },
+  features: [{ type: String }],
+  year_built: { type: Number, required: true },
+  property_type: {
+    type: String,
+    required: true,
+    enum: ["Single-Family Home", "Townhouse", "Condo", "Apartment", "Other"],
+  },
+  listing_status: {
+    type: String,
+    required: true,
+    enum: ["For Sale", "Sold", "Pending", "Off Market"],
   },
 });
 
-const upload = multer({ storage });
+const Listing = mongoose.model("Listing", listingSchema);
 
-
-const listings = [
-  {
-    _id: 1,
-    img_name: "images/house.jpeg",
-    price: "$400,000",
-    beds: 3,
-    baths: 2,
-    sqft: 2000,
-    address: "123 Maple St, Springfield, IL, 62704",
-    features: ["Fireplace", "Large Backyard", "Granite Countertops"],
-    year_built: 2010,
-    property_type: "Single-Family Home",
-    listing_status: "For Sale",
-  },
-  {
-    _id: 2,
-    img_name: "images/house2.jpg",
-    price: "$330,000",
-    beds: 2,
-    baths: 2,
-    sqft: 1750,
-    address: "9876 Spruce Ln, Columbia, SC, 29203",
-    features: ["New Roof", "Updated Kitchen", "Built-in Bookshelves"],
-    year_built: 2012,
-    property_type: "Townhouse",
-    listing_status: "For Sale",
-  },
-  {
-    _id: 3,
-    img_name: "images/house3.jpg",
-    price: "$500,000",
-    beds: 4,
-    baths: 3,
-    sqft: 2500,
-    address: "456 Oak St, Denver, CO, 80204",
-    features: ["Swimming Pool", "Solar Panels", "Hardwood Floors"],
-    year_built: 2015,
-    property_type: "Single-Family Home",
-    listing_status: "Pending",
-  },
-  {
-    _id: 4,
-    img_name: "images/house4.jpg",
-    price: "$275,000",
-    beds: 2,
-    baths: 1,
-    sqft: 1200,
-    address: "789 Pine St, Portland, OR, 97202",
-    features: ["Patio", "New HVAC System", "Corner Lot"],
-    year_built: 2005,
-    property_type: "Condo",
-    listing_status: "For Sale",
-  },
-  {
-    _id: 5,
-    img_name: "images/house5.jpg",
-    price: "$650,000",
-    beds: 5,
-    baths: 4,
-    sqft: 3200,
-    address: "321 Birch Ave, Austin, TX, 73301",
-    features: ["3-Car Garage", "Game Room", "Custom Lighting"],
-    year_built: 2018,
-    property_type: "Single-Family Home",
-    listing_status: "Sold",
-  },
-  {
-    _id: 6,
-    img_name: "images/house0.jpg",
-    price: "$350,000",
-    beds: 3,
-    baths: 2,
-    sqft: 1800,
-    address: "789 Willow Dr, Seattle, WA, 98101",
-    features: ["Deck", "Finished Basement", "Updated Bathrooms"],
-    year_built: 2010,
-    property_type: "Townhouse",
-    listing_status: "For Sale",
-  },
-  {
-    _id: 7,
-    img_name: "images/house3.jpg",
-    price: "$425,000",
-    beds: 4,
-    baths: 3,
-    sqft: 2100,
-    address: "345 Cedar Ln, Miami, FL, 33101",
-    features: ["Waterfront", "Open Floor Plan", "High Ceilings"],
-    year_built: 2020,
-    property_type: "Single-Family Home",
-    listing_status: "Pending",
-  },
-  {
-    _id: 8,
-    img_name: "images/house5.jpg",
-    price: "$275,000",
-    beds: 2,
-    baths: 1,
-    sqft: 1300,
-    address: "678 Poplar Rd, Atlanta, GA, 30301",
-    features: ["Hardwood Floors", "Updated Kitchen", "Fenced Yard"],
-    year_built: 2005,
-    property_type: "Condo",
-    listing_status: "For Sale",
-  },
-];
-
-const listingSchema = Joi.object({
+// Validation schema with Joi
+const listingValidationSchema = Joi.object({
   price: Joi.string().required(),
   beds: Joi.number().integer().required(),
   baths: Joi.number().integer().required(),
@@ -137,95 +64,84 @@ const listingSchema = Joi.object({
   features: Joi.array().items(Joi.string()).required(),
   year_built: Joi.number().integer().min(1800).max(new Date().getFullYear()).required(),
   property_type: Joi.string()
-    .valid('Single-Family Home', 'Townhouse', 'Condo', 'Apartment', 'Other')
+    .valid("Single-Family Home", "Townhouse", "Condo", "Apartment", "Other")
     .required(),
   listing_status: Joi.string()
-    .valid('For Sale', 'Sold', 'Pending', 'Off Market')
+    .valid("For Sale", "Sold", "Pending", "Off Market")
     .required(),
 });
 
-
-
+// Routes
 app.get("/", (req, res) => {
   res.sendFile(__dirname + "/index.html");
 });
 
-app.get("/api/listings", (req, res) => {
-  res.json(listings);
+// Get all listings
+app.get("/api/listings", async (req, res) => {
+  try {
+    const listings = await Listing.find();
+    res.json(listings);
+  } catch (err) {
+    res.status(500).send({ success: false, message: "Failed to fetch listings" });
+  }
 });
 
-app.post("/api/listings", upload.single('image'), (req, res) => {
-  console.log("Incoming request body:", req.body);
-  console.log("Uploaded file:", req.file);
-
-  // Validate incoming data
-  const { error } = listingSchema.validate(req.body);
+// Add a new listing
+app.post("/api/listings", upload.single("image"), async (req, res) => {
+  const { error } = listingValidationSchema.validate(req.body);
   if (error) {
-    console.error("Validation error:", error.message);
     return res.status(400).send({ success: false, message: error.message });
   }
 
-  // Create a new listing with default values for any missing fields
-  const newListing = {
-    _id: listings.length + 1,
-    img_name: req.file ? `/uploads/${req.file.filename}` : 'images/default.jpg',
+  const newListing = new Listing({
+    img_name: req.file ? `/images/${req.file.filename}` : "images/default.jpg",
     price: req.body.price,
     beds: parseInt(req.body.beds, 10),
     baths: parseInt(req.body.baths, 10),
     sqft: parseInt(req.body.sqft, 10),
     address: req.body.address,
-    features: req.body.features || [],
-    year_built: parseInt(req.body.year_built, 10) || 2000,
+    features: req.body.features.split(",").map((f) => f.trim()),
+    year_built: parseInt(req.body.year_built, 10),
     property_type: req.body.property_type,
-    listing_status: req.body.listing_status || 'For Sale',
-  };
+    listing_status: req.body.listing_status,
+  });
 
-  // Add the new listing to the in-memory listings array
-  listings.push(newListing);
-
-  // Log the added listing for debugging
-  console.log("New listing added:", newListing);
-
-  // Send a success response with the new listing
-  res.status(201).send({ success: true, listing: newListing });
+  try {
+    const savedListing = await newListing.save();
+    res.status(201).send({ success: true, listing: savedListing });
+  } catch (err) {
+    res.status(500).send({ success: false, message: "Failed to save listing" });
+  }
 });
 
-const updateSchema = Joi.object({
-  price: Joi.string().required(),
-  address: Joi.string().required(),
-}).required();
-
-
-app.put("/api/listings/:id", (req, res) => {
-  const listingId = parseInt(req.params.id, 10);
-
-  // Validate request body with updateSchema
-  const { error } = updateSchema.validate(req.body);
-  if (error) {
-    return res.status(400).send({ success: false, message: error.message });
+// Update a listing
+app.put("/api/listings/:id", async (req, res) => {
+  try {
+    const updatedListing = await Listing.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    if (!updatedListing) {
+      return res.status(404).send({ success: false, message: "Listing not found" });
+    }
+    res.send({ success: true, listing: updatedListing });
+  } catch (err) {
+    res.status(500).send({ success: false, message: "Failed to update listing" });
   }
-
-  const listingIndex = listings.findIndex((listing) => listing._id === listingId);
-  if (listingIndex === -1) {
-    return res.status(404).send({ success: false, message: "Listing not found" });
-  }
-
-  // Update only the fields submitted in the request
-  listings[listingIndex] = { ...listings[listingIndex], ...req.body };
-
-  res.status(200).send({ success: true, listing: listings[listingIndex] });
-});
-app.delete("/api/listings/:id", (req, res) => {
-  const listingId = parseInt(req.params.id, 10);
-  const listingIndex = listings.findIndex((listing) => listing._id === listingId);
-  if (listingIndex === -1) {
-    return res.status(404).send({ success: false, message: "Listing not found" });
-  }
-  listings.splice(listingIndex, 1);
-  res.status(200).send({ success: true, message: "Listing deleted successfully" });
 });
 
+// Delete a listing
+app.delete("/api/listings/:id", async (req, res) => {
+  try {
+    const deletedListing = await Listing.findByIdAndDelete(req.params.id);
+    if (!deletedListing) {
+      return res.status(404).send({ success: false, message: "Listing not found" });
+    }
+    res.send({ success: true, message: "Listing deleted successfully" });
+  } catch (err) {
+    res.status(500).send({ success: false, message: "Failed to delete listing" });
+  }
+});
+
+// Start server
 app.listen(3001, () => {
-  console.log("Listening....");
+  console.log("Listening on port 3001...");
 });
 
