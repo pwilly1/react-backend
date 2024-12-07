@@ -117,15 +117,22 @@ app.post("/api/listings", upload.single("image"), async (req, res) => {
 // Update a listing
 app.put("/api/listings/:id", async (req, res) => {
   try {
-    const updatedListing = await Listing.findByIdAndUpdate(req.params._id, req.body, { new: true });
+    const listingId = req.params.id; // Extract ID from request parameters
+    console.log(`Updating listing with ID: ${listingId}`); // Log the ID for debugging
+
+    const updatedListing = await Listing.findByIdAndUpdate(listingId, req.body, { new: true });
+
     if (!updatedListing) {
       return res.status(404).send({ success: false, message: "Listing not found" });
     }
+
     res.send({ success: true, listing: updatedListing });
   } catch (err) {
+    console.error("Error updating listing:", err);
     res.status(500).send({ success: false, message: "Failed to update listing" });
   }
 });
+
 
 app.delete("/api/listings/:id", async (req, res) => {
   try {
