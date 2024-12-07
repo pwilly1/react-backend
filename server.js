@@ -127,18 +127,21 @@ app.put("/api/listings/:id", async (req, res) => {
   }
 });
 
-// Delete a listing
 app.delete("/api/listings/:id", async (req, res) => {
   try {
-    const deletedListing = await Listing.findByIdAndDelete(req.params._id);
+    const listingId = req.params.id; // Ensure this matches the frontend ID
+    const deletedListing = await Listing.findByIdAndDelete(listingId);
+
     if (!deletedListing) {
       return res.status(404).send({ success: false, message: "Listing not found" });
     }
+
     res.send({ success: true, message: "Listing deleted successfully" });
   } catch (err) {
     res.status(500).send({ success: false, message: "Failed to delete listing" });
   }
 });
+
 
 // Start server
 app.listen(3001, () => {
