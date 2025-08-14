@@ -86,6 +86,29 @@ app.get("/api/listings", async (req, res) => {
   }
 });
 
+// Get one listing by id
+app.get("/api/listings/:id", async (req, res) => {
+  const { id } = req.params;
+
+  // Optional: reject obviously bad ids early to avoid CastError logs
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).send({ success: false, message: "Invalid id" });
+  }
+
+  try {
+    // Works when _id is an ObjectId (your schema’s default)
+    const listing = await Listing.findById(id);
+    if (!listing) {
+      return res.status(404).send({ success: false, message: "Listing not found" });
+    }
+    res.send(listing); // or res.send({ success: true, listing })
+  } catch (err) {
+    console.error("Error fetching listing:", err);
+    res.status(500).send({ success: false, message: "Failed to fetch listing" });
+  }
+});
+
+
 // Add a new listing
 app.post("/api/listings", upload.single("image"), async (req, res) => {
   const { error } = listingValidationSchema.validate(req.body);
