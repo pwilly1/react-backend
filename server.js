@@ -131,6 +131,7 @@ app.post("/api/listings", upload.single("image"), async (req, res) => {
     features: Array.isArray(req.body.features)
       ? req.body.features.map((f) => f.trim())
       : req.body.features.split(",").map((f) => f.trim()),
+    year_built: parseInt(req.body.year_built, 10), 
     property_type: req.body.property_type,
     listing_status: req.body.listing_status,
   });
