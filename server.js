@@ -8,7 +8,12 @@ const mongoose = require("mongoose");
 const app = express();
 
 // Middleware
-app.use(cors());
+const corsOptions = {
+  origin: ["https://pwilly1.github.io", "http://localhost:3000"], 
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  credentials: true,
+};
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.static("public"));
 
