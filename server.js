@@ -139,6 +139,7 @@ app.post("/api/listings", upload.single("image"), async (req, res) => {
     const savedListing = await newListing.save();
     res.status(201).send({ success: true, listing: savedListing });
   } catch (err) {
+    console.error("Error saving listing:", err);
     res.status(500).send({ success: false, message: "Failed to save listing" });
   }
 });
